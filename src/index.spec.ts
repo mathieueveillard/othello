@@ -1,15 +1,5 @@
 import { isValidMoveForDirection, isValidMove, getPossibleMoves, Board, Position, Direction } from ".";
 
-describe("Test of the test framework", function() {
-  it.skip("Should fail", function() {
-    expect(0).toEqual(1);
-  });
-
-  it("Should pass", function() {
-    expect(0).toEqual(0);
-  });
-});
-
 describe("Analyse my cell", function() {
   it("Should return false if cell is not empty", function() {
     const board: Board = [
@@ -53,20 +43,6 @@ describe("Analyse next cell", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
     expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(false);
-  });
-
-  it.skip("Should return true if next cell belongs to the opponent", function() {
-    const board: Board = [
-      [" ", "W", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(true);
   });
 });
 
