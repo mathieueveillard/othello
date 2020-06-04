@@ -2,13 +2,13 @@
 
 ## Rules
 
-Othello is a board game for two players. This kata requires you to write a function that, given the current board and the current player, computes the list of all possible moves.
+Othello is a board game for two players. This kata requires you to write a function that, given the current board and the current color, computes the list of all cells where a disk of the given color can be placed.
 
 [Othello (Wikipedia)](https://en.wikipedia.org/wiki/Reversi#Rules)
 
 Assuming the given board:
 
-```
+```text
   A B C D E F G H
 1 . . . . . . . .
 2 . . . . . . . .
@@ -20,15 +20,15 @@ Assuming the given board:
 8 . . . . . . . .
 ```
 
-Blacks start; the possibles moves are:
+Blacks start and can place a disk in the following cells:
 
-```
-(D,3), (F,5), (E,6), (C,4)
+```text
+D3, F5, E6, C4
 ```
 
 ## Installation
 
-```
+```text
 git clone https://github.com/mathieueveillard/othello-js.git
 cd othello-js
 npm install
@@ -36,6 +36,6 @@ npm install
 
 ## Development
 
-```
+```text
 npm test
 ```

@@ -1,259 +1,158 @@
-import { isValidMoveForDirection, DIRECTION, isValidMove, getPossibleMoves, Board, PlayableBoard } from ".";
+import {
+  B,
+  W,
+  _,
+  canCaptureDisksInDirection,
+  isPlayableCell,
+  getCoordinatesOfPlayableCells,
+  Board,
+  Coordinates
+} from ".";
+import { DIRECTION } from "./directions";
 
-describe("Test of the test framework", function() {
-  it.skip("Should fail", function() {
-    expect(0).toEqual(1);
+describe("Analysis of a single cell in a single direction: canCaptureDisksInDirection()", function() {
+  it("A cell which has no next cell should not be playable", function() {
+    const board: Board = [
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+    expect(canCaptureDisksInDirection(board, B, { X: 7, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
   });
 
-  it("Should pass", function() {
-    expect(0).toEqual(0);
+  it("A cell whose next cell is empty should not be playable", function() {
+    const board: Board = [
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+    expect(canCaptureDisksInDirection(board, B, { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+  });
+
+  it("A cell whose next cell contains a disk of the same color should not be playable", function() {
+    const board: Board = [
+      [_, B, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+    expect(canCaptureDisksInDirection(board, B, { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+  });
+
+  it("A cell whose next cell contains a disk of the opponent's color but which has no second next cell should not be playable", function() {
+    const board: Board = [
+      [_, _, _, _, _, _, _, W],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+    expect(canCaptureDisksInDirection(board, B, { X: 6, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+  });
+
+  it("A cell whose next cell contains a disk of the opponent's color but the one after is empty should not be playable", function() {
+    const board: Board = [
+      [_, W, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+    expect(canCaptureDisksInDirection(board, B, { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+  });
+
+  it("A cell should be playable for a given color if it allows to capture disks of the opponent's color", function() {
+    const board: Board = [
+      [_, W, B, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+    expect(canCaptureDisksInDirection(board, B, { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(true);
   });
 });
 
-describe("Analyse my cell", function() {
-  it("Should return false if cell is not empty", function() {
+describe("Analysis of a single cell in all the 8 directions: isPlayableCell()", function() {
+  it("A cell that is not empty should not be playable", function() {
     const board: Board = [
-      ["B", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
+      [B, W, B, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+    expect(isPlayableCell(board, B, { X: 0, Y: 0 })).toEqual(false);
+  });
+
+  it("A cell should not be playable if it doesn't allow to capture disks of the opponent's color in any direction", function() {
+    const board: Board = [
+      [_, W, _, _, _, W, _, _],
+      [_, _, W, B, W, _, _, _],
+      [_, W, W, _, W, W, W, W],
+      [_, _, W, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+    expect(isPlayableCell(board, B, { X: 3, Y: 2 })).toEqual(false);
+  });
+
+  it("A cell should be playable if it allows to capture disks of the opponent's color in at least one direction", function() {
+    const board: Board = [
+      [_, B, _, _, _, W, _, _],
+      [_, _, W, B, W, _, _, _],
+      [_, W, W, _, W, W, W, W],
+      [_, _, W, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+    expect(isPlayableCell(board, B, { X: 3, Y: 2 })).toEqual(true);
   });
 });
 
-describe("Analyse next cell", function() {
-  it("Should return false if next cell is empty", function() {
+describe("Analysis of the whole board: getCoordinatesOfPlayableCells()", function() {
+  it("It should return the coordinates of all the playable cells for a given color", function() {
     const board: Board = [
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, W, B, _, _, _],
+      [_, _, _, B, W, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
-  });
-
-  it("Should return false if next cell is of the same player", function() {
-    const board: Board = [
-      [" ", "B", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
-  });
-
-  it.skip("Should return true if next cell belongs to the opponent", function() {
-    const board: Board = [
-      [" ", "W", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(true);
-  });
-});
-
-describe("Analyse the two next cells", function() {
-  it("Should return false if next cell belongs to the opponent but the one after is empty", function() {
-    const board: Board = [
-      [" ", "W", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
-  });
-
-  it("Should return false if next cell belongs to the opponent and the one after alse of the opponent", function() {
-    const board: Board = [
-      [" ", "W", "W", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
-  });
-
-  it("Should return true if next cell belongs to the opponent and the one after of the same player", function() {
-    const board: Board = [
-      [" ", "W", "B", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(true);
-  });
-});
-
-describe("Stop at boarders", function() {
-  it("Should return false if next cell is outside the board (right)", function() {
-    const board: Board = [
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 7, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
-  });
-
-  it("Should return false if next cell is outside the board (top)", function() {
-    const board: Board = [
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.TOP)).toEqual(false);
-  });
-
-  it("Should return false if next cell belongs to the opponent but the cell after is outside the board", function() {
-    const board: Board = [
-      [" ", " ", " ", " ", " ", " ", " ", "W"],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 6, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
-  });
-});
-
-describe("Analyse the whole direction recursively", function() {
-  it("Should return false if two following cells belong to the opponent and the next after is empty", function() {
-    const board: Board = [
-      [" ", "W", "W", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
-  });
-
-  it("Should return false if all following cells belong to the opponent (then boarder)", function() {
-    const board: Board = [
-      [" ", "W", "W", "W", "W", "W", "W", "W"],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
-  });
-
-  it("Should return false if two following cells belong to the opponent and the next after belongs to the player", function() {
-    const board: Board = [
-      [" ", "W", "W", "B", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(true);
-  });
-});
-
-describe("Analyse the 8 directions", function() {
-  it("Should analyse the 8 directions", function() {
-    const board: Board = [
-      [" ", "W", " ", " ", " ", "W", " ", " "],
-      [" ", " ", "W", "B", "W", " ", " ", " "],
-      [" ", "W", "W", " ", "W", "W", "W", "W"],
-      [" ", " ", "W", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMove(board, "B", { X: 3, Y: 2 })).toEqual(false);
-  });
-
-  it("Should analyse the 8 directions", function() {
-    const board: Board = [
-      [" ", "B", " ", " ", " ", "W", " ", " "],
-      [" ", " ", "W", "B", "W", " ", " ", " "],
-      [" ", "W", "W", " ", "W", "W", "W", "W"],
-      [" ", " ", "W", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(isValidMove(board, "B", { X: 3, Y: 2 })).toEqual(true);
-  });
-});
-
-describe("Analyse all possible moves", function() {
-  it("Should return all possible moves", function() {
-    const board: Board = [
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", "B", "W", " ", " ", " "],
-      [" ", " ", " ", "W", "B", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    const possibleMoves: PlayableBoard = [
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", "x", " ", " ", " "],
-      [" ", " ", " ", " ", " ", "x", " ", " "],
-      [" ", " ", "x", " ", " ", " ", " ", " "],
-      [" ", " ", " ", "x", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
-    ];
-    expect(getPossibleMoves(board, "B")).toEqual(possibleMoves);
+    const possibleMoves: Coordinates[] = ["D3", "C4", "F5", "E6"];
+    expect(getCoordinatesOfPlayableCells(board, B)).toEqual(possibleMoves);
   });
 });

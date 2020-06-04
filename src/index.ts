@@ -1,140 +1,130 @@
-type Empty = " ";
+import { Iterable } from "./util/Iterable";
+import { ALL_DIRECTIONS } from "./directions";
+import { partial } from "ramda";
 
-type Player = "B" | "W";
+export const _ = " ";
 
-type CellContent = Empty | Player;
+export const B = "B";
+
+export const W = "W";
+
+type Empty = typeof _;
+
+type Color = typeof B | typeof W;
+
+type CellContent = Empty | Color;
 
 export type Board = CellContent[][];
 
-type IsPlayable = "x";
+/*
+ *         A B C D E F G H (external)
+ *         0 1 2 3 4 5 6 7 (internal: X)
+ *    1 0  _ _ _ _ _ _ _ _
+ *    2 1  _ _ _ _ _ _ _ _
+ *    3 2  _ _ _ _ _ _ _ _
+ *    4 3  _ _ _ W B _ _ _
+ *    5 4  _ _ _ B W _ _ _
+ *    6 5  _ _ _ _ _ _ _ _
+ *    7 6  _ _ _ _ _ _ _ _
+ *    8 7  _ _ _ _ _ _ _ _
+ *     (Y)
+ */
 
-type PlayableCellContent = Empty | IsPlayable;
+export type Coordinates = string;
 
-export type PlayableBoard = PlayableCellContent[][];
-
-interface Position {
+export interface InternalCoordinates {
   X: number;
   Y: number;
 }
 
-interface Direction {
+export interface Direction {
   dX: number;
   dY: number;
 }
 
 const DIMENSION = 8;
 
-export const DIRECTION = {
-  TOP: {
-    dX: 0,
-    dY: -1
-  },
-  TOP_RIGHT: {
-    dX: 1,
-    dY: -1
-  },
-  RIGHT: {
-    dX: 1,
-    dY: 0
-  },
-  BOTTOM_RIGHT: {
-    dX: 1,
-    dY: 1
-  },
-  BOTTOM: {
-    dX: 0,
-    dY: 1
-  },
-  BOTTOM_LEFT: {
-    dX: -1,
-    dY: 1
-  },
-  LEFT: {
-    dX: -1,
-    dY: 0
-  },
-  TOP_LEFT: {
-    dX: -1,
-    dY: -1
-  }
-};
+const X_COORDINATES: string[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
-export function getPossibleMoves(board: Board, player: Player): PlayableBoard {
-  const possibleMoves: PlayableBoard = [
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "]
-  ];
-  for (let rowIndex = 0; rowIndex < DIMENSION; rowIndex++) {
-    for (let columnIndex = 0; columnIndex < DIMENSION; columnIndex++) {
-      possibleMoves[rowIndex][columnIndex] = isValidMove(board, player, { X: columnIndex, Y: rowIndex }) ? "x" : " ";
+const Y_COORDINATES: string[] = ["1", "2", "3", "4", "5", "6", "7", "8"];
+
+type IterableBoard<T> = Iterable<T, CellContent, InternalCoordinates, Board>;
+
+function toIterableBoard<T>(board: Board): IterableBoard<T> {
+  return {
+    reduce: function(reducer, initialValue) {
+      return board.reduce(function(lineAccumulator, line, lineIndex) {
+        return line.reduce(function(columnAccumulator, cell, columnIndex) {
+          return reducer(columnAccumulator, cell, { X: columnIndex, Y: lineIndex }, board);
+        }, lineAccumulator);
+      }, initialValue);
     }
-  }
-  return possibleMoves;
+  };
 }
 
-export function isValidMove(board: Board, player: Player, position: Position): boolean {
-  return (
-    isValidMoveForDirection(board, player, position, DIRECTION.TOP) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.TOP_RIGHT) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.RIGHT) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.BOTTOM_RIGHT) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.BOTTOM) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.BOTTOM_LEFT) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.LEFT) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.TOP_LEFT)
+export function getCoordinatesOfPlayableCells(board: Board, color: Color): Coordinates[] {
+  return getInternalCoordinatesOfPlayableCells(board, color).map(toCoordinates);
+}
+
+export function getInternalCoordinatesOfPlayableCells(board: Board, color: Color): InternalCoordinates[] {
+  return toIterableBoard<InternalCoordinates[]>(board).reduce(
+    (accumulator, _, internalCoordinates) =>
+      isPlayableCell(board, color, internalCoordinates) ? [...accumulator, internalCoordinates] : accumulator,
+    []
   );
 }
 
-export function isValidMoveForDirection(
+export function isPlayableCell(board: Board, color: Color, coordinates: InternalCoordinates): boolean {
+  return (
+    cellIsEmpty(board, coordinates) &&
+    ALL_DIRECTIONS.some(partial(canCaptureDisksInDirection, [board, color, coordinates]))
+  );
+}
+
+function cellIsEmpty(board: Board, coordinates: InternalCoordinates): boolean {
+  return getCellContent(board, coordinates) === _;
+}
+
+export function canCaptureDisksInDirection(
   board: Board,
-  player: Player,
-  position: Position,
+  color: Color,
+  coordinates: InternalCoordinates,
   direction: Direction
 ): boolean {
-  return cellIsEmpty(board, position) && canTakeCellsToOpponent(board, player, position, direction);
-}
-
-function cellIsEmpty(board: Board, position: Position): boolean {
-  return getCell(board, position) === " ";
-}
-
-function canTakeCellsToOpponent(board: Board, player: Player, position: Position, direction: Direction): boolean {
-  const nextCell: Position = computeNextCellPosition(position, direction);
-  const secondNextCell: Position = computeNextCellPosition(nextCell, direction);
+  const nextCell: InternalCoordinates = computeNextCellCoordinates(coordinates, direction);
+  const secondNextCell: InternalCoordinates = computeNextCellCoordinates(nextCell, direction);
   return (
-    cellIsOpponent(board, player, nextCell) &&
-    (cellIsPlayer(board, player, secondNextCell) || canTakeCellsToOpponent(board, player, nextCell, direction))
+    cellIsOpponentColor(board, color, nextCell) &&
+    (cellIsColor(board, color, secondNextCell) || canCaptureDisksInDirection(board, color, nextCell, direction))
   );
 }
 
-function getCell(board: Board, { X, Y }: Position): CellContent {
+function getCellContent(board: Board, { X, Y }: InternalCoordinates): CellContent {
   if (Y < 0 || Y >= DIMENSION) {
     return undefined;
   }
   return board[Y][X];
 }
 
-function computeNextCellPosition({ X, Y }: Position, { dX, dY }: Direction): Position {
+function computeNextCellCoordinates({ X, Y }: InternalCoordinates, { dX, dY }: Direction): InternalCoordinates {
   return {
     X: X + dX,
     Y: Y + dY
   };
 }
 
-function cellIsPlayer(board: Board, player: Player, position: Position): boolean {
-  return getCell(board, position) === player;
+function cellIsColor(board: Board, color: Color, coordinates: InternalCoordinates): boolean {
+  return getCellContent(board, coordinates) === color;
 }
 
-function cellIsOpponent(board: Board, player: Player, position: Position): boolean {
-  return getCell(board, position) === opponent(player);
+function cellIsOpponentColor(board: Board, color: Color, coordinates: InternalCoordinates): boolean {
+  return getCellContent(board, coordinates) === opponent(color);
 }
 
-function opponent(player: Player): Player {
-  return player === "B" ? "W" : "B";
+function opponent(color: Color): Color {
+  return color === B ? W : B;
+}
+
+export function toCoordinates({ X, Y }: InternalCoordinates): Coordinates {
+  return X_COORDINATES[X] + Y_COORDINATES[Y];
 }
