@@ -1,4 +1,4 @@
-import { isValidMoveForDirection, isValidMove, getPossibleMoves, Board, PlayableBoard, Direction } from ".";
+import { isValidMoveForDirection, isValidMove, getPossibleMoves, Board, Position, Direction } from ".";
 
 describe("Test of the test framework", function() {
   it.skip("Should fail", function() {
@@ -238,21 +238,17 @@ describe("Analyse all possible moves", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", "B", "W", " ", " ", " "],
       [" ", " ", " ", "W", "B", " ", " ", " "],
+      [" ", " ", " ", "B", "W", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    const possibleMoves: PlayableBoard = [
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", "x", " ", " ", " "],
-      [" ", " ", " ", " ", " ", "x", " ", " "],
-      [" ", " ", "x", " ", " ", " ", " ", " "],
-      [" ", " ", " ", "x", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "]
+    const possibleMoves: Position[] = [
+      { X: 3, Y: 2 },
+      { X: 2, Y: 3 },
+      { X: 5, Y: 4 },
+      { X: 4, Y: 5 }
     ];
     expect(getPossibleMoves(board, "B")).toEqual(possibleMoves);
   });

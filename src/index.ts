@@ -6,13 +6,28 @@ type CellContent = Empty | Player;
 
 export type Board = CellContent[][];
 
-type IsPlayable = "x";
+interface IterableBoard {
+  board: Board;
+  reduce: <T>(
+    reducer: (accumulator: T, current: CellContent, index: Position, source: Board) => T,
+    initialAccumulator: T
+  ) => T;
+}
 
-type PlayableCellContent = Empty | IsPlayable;
+function toIterableBoard(board: Board): IterableBoard {
+  return {
+    board,
+    reduce: function(reducer, initialBoardAccumulator) {
+      return board.reduce(function(boardAccumulator, line, lineIndex) {
+        return line.reduce(function(lineAccumulator, cell, columnIndex) {
+          return reducer(lineAccumulator, cell, { X: columnIndex, Y: lineIndex }, board);
+        }, boardAccumulator);
+      }, initialBoardAccumulator);
+    }
+  };
+}
 
-export type PlayableBoard = PlayableCellContent[][];
-
-interface Position {
+export interface Position {
   X: number;
   Y: number;
 }
@@ -77,23 +92,12 @@ export const Direction = {
 
 const DIRECTIONS = [TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, LEFT, TOP_LEFT];
 
-export function getPossibleMoves(board: Board, player: Player): PlayableBoard {
-  const possibleMoves: PlayableBoard = [
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "]
-  ];
-  for (let rowIndex = 0; rowIndex < DIMENSION; rowIndex++) {
-    for (let columnIndex = 0; columnIndex < DIMENSION; columnIndex++) {
-      possibleMoves[rowIndex][columnIndex] = isValidMove(board, player, { X: columnIndex, Y: rowIndex }) ? "x" : " ";
-    }
-  }
-  return possibleMoves;
+export function getPossibleMoves(board: Board, player: Player): Position[] {
+  return toIterableBoard(board).reduce<Position[]>(
+    (possibleMoves, _, position) =>
+      isValidMove(board, player, position) ? [...possibleMoves, position] : possibleMoves,
+    []
+  );
 }
 
 export function isValidMove(board: Board, player: Player, position: Position): boolean {
