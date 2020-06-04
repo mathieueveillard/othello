@@ -1,4 +1,4 @@
-import { isValidMoveForDirection, DIRECTION, isValidMove, getPossibleMoves, Board, PlayableBoard } from ".";
+import { isValidMoveForDirection, isValidMove, getPossibleMoves, Board, PlayableBoard, Direction } from ".";
 
 describe("Test of the test framework", function() {
   it.skip("Should fail", function() {
@@ -22,7 +22,7 @@ describe("Analyse my cell", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(false);
   });
 });
 
@@ -38,7 +38,7 @@ describe("Analyse next cell", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(false);
   });
 
   it("Should return false if next cell is of the same player", function() {
@@ -52,7 +52,7 @@ describe("Analyse next cell", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(false);
   });
 
   it.skip("Should return true if next cell belongs to the opponent", function() {
@@ -66,7 +66,7 @@ describe("Analyse next cell", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(true);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(true);
   });
 });
 
@@ -82,7 +82,7 @@ describe("Analyse the two next cells", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(false);
   });
 
   it("Should return false if next cell belongs to the opponent and the one after alse of the opponent", function() {
@@ -96,7 +96,7 @@ describe("Analyse the two next cells", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(false);
   });
 
   it("Should return true if next cell belongs to the opponent and the one after of the same player", function() {
@@ -110,7 +110,7 @@ describe("Analyse the two next cells", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(true);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(true);
   });
 });
 
@@ -126,7 +126,7 @@ describe("Stop at boarders", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 7, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+    expect(isValidMoveForDirection(board, "B", { X: 7, Y: 0 }, Direction.RIGHT)).toEqual(false);
   });
 
   it("Should return false if next cell is outside the board (top)", function() {
@@ -140,7 +140,7 @@ describe("Stop at boarders", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.TOP)).toEqual(false);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.TOP)).toEqual(false);
   });
 
   it("Should return false if next cell belongs to the opponent but the cell after is outside the board", function() {
@@ -154,7 +154,7 @@ describe("Stop at boarders", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 6, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+    expect(isValidMoveForDirection(board, "B", { X: 6, Y: 0 }, Direction.RIGHT)).toEqual(false);
   });
 });
 
@@ -170,7 +170,7 @@ describe("Analyse the whole direction recursively", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(false);
   });
 
   it("Should return false if all following cells belong to the opponent (then boarder)", function() {
@@ -184,7 +184,7 @@ describe("Analyse the whole direction recursively", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(false);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(false);
   });
 
   it("Should return false if two following cells belong to the opponent and the next after belongs to the player", function() {
@@ -198,7 +198,7 @@ describe("Analyse the whole direction recursively", function() {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "]
     ];
-    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, DIRECTION.RIGHT)).toEqual(true);
+    expect(isValidMoveForDirection(board, "B", { X: 0, Y: 0 }, Direction.RIGHT)).toEqual(true);
   });
 });
 

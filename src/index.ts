@@ -24,40 +24,58 @@ interface Direction {
 
 const DIMENSION = 8;
 
-export const DIRECTION = {
-  TOP: {
-    dX: 0,
-    dY: -1
-  },
-  TOP_RIGHT: {
-    dX: 1,
-    dY: -1
-  },
-  RIGHT: {
-    dX: 1,
-    dY: 0
-  },
-  BOTTOM_RIGHT: {
-    dX: 1,
-    dY: 1
-  },
-  BOTTOM: {
-    dX: 0,
-    dY: 1
-  },
-  BOTTOM_LEFT: {
-    dX: -1,
-    dY: 1
-  },
-  LEFT: {
-    dX: -1,
-    dY: 0
-  },
-  TOP_LEFT: {
-    dX: -1,
-    dY: -1
-  }
+const TOP: Direction = {
+  dX: 0,
+  dY: -1
 };
+
+const TOP_RIGHT: Direction = {
+  dX: 1,
+  dY: -1
+};
+
+const RIGHT: Direction = {
+  dX: 1,
+  dY: 0
+};
+
+const BOTTOM_RIGHT: Direction = {
+  dX: 1,
+  dY: 1
+};
+
+const BOTTOM: Direction = {
+  dX: 0,
+  dY: 1
+};
+
+const BOTTOM_LEFT: Direction = {
+  dX: -1,
+  dY: 1
+};
+
+const LEFT: Direction = {
+  dX: -1,
+  dY: 0
+};
+
+const TOP_LEFT: Direction = {
+  dX: -1,
+  dY: -1
+};
+
+export const Direction = {
+  TOP,
+  TOP_RIGHT,
+  RIGHT,
+  BOTTOM_RIGHT,
+  BOTTOM,
+  BOTTOM_LEFT,
+  LEFT,
+  TOP_LEFT
+};
+
+const DIRECTIONS = [TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, LEFT, TOP_LEFT];
 
 export function getPossibleMoves(board: Board, player: Player): PlayableBoard {
   const possibleMoves: PlayableBoard = [
@@ -79,15 +97,9 @@ export function getPossibleMoves(board: Board, player: Player): PlayableBoard {
 }
 
 export function isValidMove(board: Board, player: Player, position: Position): boolean {
-  return (
-    isValidMoveForDirection(board, player, position, DIRECTION.TOP) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.TOP_RIGHT) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.RIGHT) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.BOTTOM_RIGHT) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.BOTTOM) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.BOTTOM_LEFT) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.LEFT) ||
-    isValidMoveForDirection(board, player, position, DIRECTION.TOP_LEFT)
+  return DIRECTIONS.reduce(
+    (result, direction) => result || isValidMoveForDirection(board, player, position, direction),
+    false
   );
 }
 
