@@ -1,5 +1,5 @@
 import { Iterable } from "./util/Iterable";
-import { ALL_DIRECTIONS } from "./directions";
+import { ALL_DIRECTIONS, DIRECTION } from "./directions";
 import { partial } from "ramda";
 
 export const _ = " ";
@@ -127,4 +127,31 @@ function opponent(color: Color): Color {
 
 export function toCoordinates({ X, Y }: InternalCoordinates): Coordinates {
   return X_COORDINATES[X] + Y_COORDINATES[Y];
+}
+
+export type Projection = CellContent[];
+
+export function project(board: Board, { X, Y }: InternalCoordinates, direction: Direction): Projection {
+  let x = X;
+  let y = Y;
+  const { dX, dY } = direction;
+  let result: Projection = [];
+  while (x >= 0 && x < DIMENSION && y >= 0 && y < DIMENSION) {
+    result.push(board[y][x]);
+    x += dX;
+    y += dY;
+  }
+  const [_, ...rest] = result;
+  return rest;
+
+  const temp = (function() {
+    if (dY === 0) {
+      return board[Y].filter((_, i) => dX * (i - X) > 0);
+    }
+    return board.map((line, i) => line[X + dX * dY * (i - Y)]).filter((cell, i) => dY * (i - Y) > 0 && !!cell);
+  })();
+  if (dY < 0 || (dY === 0 && dX < 0)) {
+    return [...temp].reverse();
+  }
+  return temp;
 }

@@ -6,7 +6,9 @@ import {
   isPlayableCell,
   getCoordinatesOfPlayableCells,
   Board,
-  Coordinates
+  Coordinates,
+  Projection,
+  project
 } from ".";
 import { DIRECTION } from "./directions";
 
@@ -154,5 +156,175 @@ describe("Analysis of the whole board: getCoordinatesOfPlayableCells()", functio
     ];
     const possibleMoves: Coordinates[] = ["D3", "C4", "F5", "E6"];
     expect(getCoordinatesOfPlayableCells(board, B)).toEqual(possibleMoves);
+  });
+});
+
+describe("Projection", function() {
+  it("should project to RIGHT", function() {
+    // GIVEN
+    const board: Board = [
+      [_, _, _, _, _, _, _, _],
+      [_, W, B, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+
+    // WHEN
+    const actual: Projection = project(board, { X: 1, Y: 1 }, DIRECTION.RIGHT);
+
+    // THEN
+    const expected: Projection = [B, _, _, _, _, _];
+    expect(actual).toEqual(expected);
+  });
+
+  it("should project to BOTTOM", function() {
+    // GIVEN
+    const board: Board = [
+      [_, _, _, _, _, _, _, _],
+      [_, W, _, _, _, _, _, _],
+      [_, B, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+
+    // WHEN
+    const actual: Projection = project(board, { X: 1, Y: 0 }, DIRECTION.BOTTOM);
+
+    // THEN
+    const expected: Projection = [W, B, _, _, _, _, _];
+    expect(actual).toEqual(expected);
+  });
+
+  it("should project to BOTTOM_RIGHT", function() {
+    // GIVEN
+    const board: Board = [
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, W, _, _, _, _, _, _],
+      [_, _, B, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+
+    // WHEN
+    const actual: Projection = project(board, { X: 1, Y: 4 }, DIRECTION.BOTTOM_RIGHT);
+
+    // THEN
+    const expected: Projection = [B, _, _];
+    expect(actual).toEqual(expected);
+  });
+
+  it("should project to TOP_RIGHT", function() {
+    // GIVEN
+    const board: Board = [
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, B, _, _, _, _, _],
+      [_, W, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+
+    // WHEN
+    const actual: Projection = project(board, { X: 1, Y: 4 }, DIRECTION.TOP_RIGHT);
+
+    // THEN
+    const expected: Projection = [B, _, _, _];
+    expect(actual).toEqual(expected);
+  });
+
+  it("should project to LEFT", function() {
+    // GIVEN
+    const board: Board = [
+      [_, _, _, _, _, _, _, _],
+      [_, W, B, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+
+    // WHEN
+    const actual: Projection = project(board, { X: 2, Y: 1 }, DIRECTION.LEFT);
+
+    // THEN
+    const expected: Projection = [W, _];
+    expect(actual).toEqual(expected);
+  });
+
+  it("should project to TOP", function() {
+    // GIVEN
+    const board: Board = [
+      [_, _, _, _, _, _, _, _],
+      [_, W, _, _, _, _, _, _],
+      [_, B, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+
+    // WHEN
+    const actual: Projection = project(board, { X: 1, Y: 4 }, DIRECTION.TOP);
+
+    // THEN
+    const expected: Projection = [_, B, W, _];
+    expect(actual).toEqual(expected);
+  });
+
+  it("should project to TOP_LEFT", function() {
+    // GIVEN
+    const board: Board = [
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, W, _, _, _, _, _, _],
+      [_, _, B, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+
+    // WHEN
+    const actual: Projection = project(board, { X: 3, Y: 6 }, DIRECTION.TOP_LEFT);
+
+    // THEN
+    const expected: Projection = [B, W, _];
+    expect(actual).toEqual(expected);
+  });
+
+  it("should project to BOTTOM_LEFT", function() {
+    // GIVEN
+    const board: Board = [
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, B, _, _, _, _, _],
+      [_, W, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _],
+      [_, _, _, _, _, _, _, _]
+    ];
+
+    // WHEN
+    const actual: Projection = project(board, { X: 2, Y: 3 }, DIRECTION.BOTTOM_LEFT);
+
+    // THEN
+    const expected: Projection = [W, _];
+    expect(actual).toEqual(expected);
   });
 });
